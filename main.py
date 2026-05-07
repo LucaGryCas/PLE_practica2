@@ -70,7 +70,10 @@ def build_word_vocab(sentences, min_freq=1):
 
 def build_tag_vocab(labels):
     unique_tags = sorted({tag for sent_tags in labels for tag in sent_tags})
-    tag2idx = {tag: i for i, tag in enumerate(unique_tags)}
+    tag2idx = {PAD_TAG: 0}
+    for tag in unique_tags:
+        if tag not in tag2idx:
+            tag2idx[tag] = len(tag2idx)
     idx2tag = {i: tag for tag, i in tag2idx.items()}
     return tag2idx, idx2tag
 
@@ -354,7 +357,8 @@ def main():
         y_pred_tags = predict_ff_sentence_tags(model, test_sents, word2idx, idx2tag, args.window)
 
     else:
-        X_train, y_train, max_len = create_lstm_data(train_sents, train_labels, word2idx, tag2idx)
+        max_len = max(len(s) for s in train_sents + dev_sents + test_sents)
+        X_train, y_train, _ = create_lstm_data(train_sents, train_labels, word2idx, tag2idx, max_len=max_len)
         X_dev, y_dev, _ = create_lstm_data(dev_sents, dev_labels, word2idx, tag2idx, max_len=max_len)
         X_test, y_test, _ = create_lstm_data(test_sents, test_labels, word2idx, tag2idx, max_len=max_len)
 
