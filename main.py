@@ -268,34 +268,33 @@ def evaluate_ner_nervaluate(y_true, y_pred):
         return
 
     evaluator = Evaluator(y_true, y_pred, tags=entity_tags, loader="list")
-    results, results_by_tag = evaluator.evaluate()
+    results = evaluator.evaluate()
 
     print("\n" + "=" * 60)
     print("Evaluación NER con nervaluate")
     print("=" * 60)
 
     for schema in ["strict", "exact", "partial", "ent_type"]:
-        res = results[schema]
+        res = results["overall"][schema]          # ← "overall" for global metrics
         print(f"\n[{schema}]")
-        print(f"Precision: {res['precision']:.4f}")
-        print(f"Recall:    {res['recall']:.4f}")
-        print(f"F1:        {res['f1']:.4f}")
+        print(f"Precision: {res.precision:.4f}")  # ← dot access, not dict
+        print(f"Recall:    {res.recall:.4f}")
+        print(f"F1:        {res.f1:.4f}")
 
     print("\n" + "=" * 60)
     print("Resultados por tipo de entidad")
     print("=" * 60)
 
-    for entity, entity_results in results_by_tag.items():
+    for entity, entity_results in results["entities"].items():  # ← "entities" key
         print(f"\nEntidad: {entity}")
         for schema in ["strict", "exact", "partial", "ent_type"]:
             res = entity_results[schema]
             print(
                 f"  {schema:8s} -> "
-                f"P: {res['precision']:.4f} | "
-                f"R: {res['recall']:.4f} | "
-                f"F1: {res['f1']:.4f}"
+                f"P: {res.precision:.4f} | "
+                f"R: {res.recall:.4f} | "
+                f"F1: {res.f1:.4f}"
             )
-
 # ── Main ──────────────────────────────────────────────────────────────────────
 def parse_args():
     parser = argparse.ArgumentParser(description="Sequence labeling con Keras")
